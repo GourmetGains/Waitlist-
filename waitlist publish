@@ -1,14 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gourmet Gains — Join the Waitlist</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "public/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ]
+}
+// api/subscribe.js
+// Vercel serverless function — runs server-side, credentials never exposed to browser
+
+export default async function handler(req, res) {
+  // Only allow POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { name, email, goal } = req.body;
+
+  // Basic validation
+  if (!name || !email) {
+    return res.status(400).json({ error: 'Name and email are required' });
+  }
+  if (!email.includes('@') || !email.includes('.')) {
+    return res.status(400).json({ error: 'Invalid email address' });
+  }
+
+  // Credentials live in Vercel Environment Variables — never in client code
+  const PUBLIC_KEY  = process.env.EMAILJS_PUBLIC_KEY;
+  const SERVICE_ID  = process.env.EMAILJS_SERVICE_ID;
+  const TEMPLATE_ID = process.env.EMAILJS_TEMPLATE_ID;
+
+  if (!PUBLIC_KEY || !SERVICE_ID || !TEMPLATE_ID) {
+    console.error('Missing EmailJS environment variables');
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+
+  try {
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id:  SERVICE_ID,
+        template_id: TEMPLATE_ID,
+        user_id:     PUBLIC_KEY,
+        template_params: {
+          to_name:   name,
+          to_email:  email,
+          user_goal: goal || 'Not specified',
+          reply_to:  'info@gourmetgains.co.uk',
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error('EmailJS error:', text);
+      // Still return success to user — don't block signup on email failure
+    }
+
+    return res.status(200).json({ success: true });
+
+  } catch (err) {
+    console.error('Fetch error:', err);
+    // Return success anyway — log internally, don't punish the user
+    return res.status(200).json({ success: true });
+  }
+}
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.production
+
+# Dependencies
+node_modules/
+
+# Vercel build output
+.vercel/
+
+# OS files
+.DS_Store
+Thumbs.db
+/* ── RESET & ROOT ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --brand: #2D6A4F;
@@ -17,13 +93,7 @@
   --brand-light: #B7E4C7;
   --brand-pale: #D8F3DC;
   --accent: #E76F51;
-  --accent-light: #FDEBD0;
   --gold: #C9A84C;
-  --gold-light: #FDF3D0;
-  --text: #1a1a1a;
-  --text-mid: #444;
-  --text-muted: #777;
-  --border: #e0e0e0;
   --bg: #0e1f18;
   --surface: rgba(255,255,255,0.04);
 }
@@ -57,7 +127,6 @@ body {
   width: 600px; height: 600px;
   background: #40916C;
   top: -150px; right: -100px;
-  animation-delay: 0s;
 }
 .bg-orb-2 {
   width: 400px; height: 400px;
@@ -78,8 +147,6 @@ body {
   from { transform: translate(0, 0) scale(1); }
   to   { transform: translate(30px, 40px) scale(1.08); }
 }
-
-/* ── NOISE TEXTURE OVERLAY ── */
 .bg-canvas::after {
   content: '';
   position: absolute;
@@ -122,10 +189,7 @@ nav {
   align-items: center;
   gap: 10px;
 }
-.nav-logo-mark {
-  width: 36px; height: 36px;
-  flex-shrink: 0;
-}
+.nav-logo-mark { width: 36px; height: 36px; flex-shrink: 0; }
 .nav-cta {
   background: var(--brand-mid);
   color: #fff;
@@ -152,7 +216,6 @@ nav {
   padding: 120px 40px 80px;
   position: relative;
 }
-
 .hero-tag {
   display: inline-flex;
   align-items: center;
@@ -179,7 +242,6 @@ nav {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%       { opacity: 0.5; transform: scale(0.8); }
 }
-
 .hero h1 {
   font-family: 'Playfair Display', serif;
   font-size: clamp(44px, 7vw, 80px);
@@ -189,16 +251,8 @@ nav {
   margin-bottom: 24px;
   animation: fadeUp 0.6s 0.1s ease both;
 }
-.hero h1 em {
-  font-style: italic;
-  color: var(--brand-light);
-}
-.hero h1 .accent-word {
-  position: relative;
-  display: inline-block;
-  color: var(--gold);
-}
-
+.hero h1 em { font-style: italic; color: var(--brand-light); }
+.hero h1 .accent-word { color: var(--gold); }
 .hero-sub {
   font-size: clamp(16px, 2vw, 19px);
   color: rgba(255,255,255,0.55);
@@ -209,7 +263,34 @@ nav {
   animation: fadeUp 0.6s 0.2s ease both;
 }
 
-/* ── WAITLIST FORM ── */
+/* ── WAITLIST COUNTER ── */
+.waitlist-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  animation: fadeUp 0.6s 0.15s ease both;
+}
+.mini-avatars { display: flex; }
+.mini-avatar {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2px solid #0e1f18;
+  margin-left: -6px;
+  font-size: 9px;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+}
+.mini-avatar:first-child { margin-left: 0; }
+.mini-avatar:nth-child(1) { background: linear-gradient(135deg, #40916C, #C9A84C); }
+.mini-avatar:nth-child(2) { background: linear-gradient(135deg, #E76F51, #C9A84C); }
+.mini-avatar:nth-child(3) { background: linear-gradient(135deg, #40916C, #2D6A4F); }
+
+/* ── FORM BOX ── */
 .waitlist-box {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(183,228,199,0.12);
@@ -229,13 +310,12 @@ nav {
   margin-bottom: 8px;
   color: #fff;
 }
-.waitlist-box p {
+.waitlist-box > div > p {
   font-size: 13px;
   color: rgba(255,255,255,0.45);
   margin-bottom: 24px;
   line-height: 1.5;
 }
-
 .form-row {
   display: flex;
   flex-direction: column;
@@ -259,7 +339,6 @@ nav {
   border-color: rgba(183,228,199,0.4);
   background: rgba(255,255,255,0.08);
 }
-
 .goal-select {
   appearance: none;
   -webkit-appearance: none;
@@ -269,7 +348,6 @@ nav {
   cursor: pointer;
 }
 .goal-select option { background: #1B4332; color: #fff; }
-
 .submit-btn {
   width: 100%;
   background: var(--brand-mid);
@@ -284,14 +362,10 @@ nav {
   transition: all 0.2s;
   letter-spacing: 0.01em;
   margin-top: 4px;
-  position: relative;
-  overflow: hidden;
 }
 .submit-btn:hover { background: #52b788; transform: translateY(-1px); }
 .submit-btn:active { transform: translateY(0); }
 .submit-btn.loading { opacity: 0.7; pointer-events: none; cursor: wait; }
-.submit-btn.success { background: #1B4332; }
-
 .privacy-note {
   font-size: 11px;
   color: rgba(255,255,255,0.25);
@@ -357,9 +431,7 @@ nav {
   margin: 0 auto 80px;
   animation: fadeUp 0.6s 0.4s ease both;
 }
-.stat-item {
-  text-align: center;
-}
+.stat-item { text-align: center; }
 .stat-val {
   font-family: 'Playfair Display', serif;
   font-size: 32px;
@@ -369,27 +441,11 @@ nav {
   margin-bottom: 5px;
 }
 .stat-val span { color: var(--brand-light); }
-.stat-lbl {
-  font-size: 12px;
-  color: rgba(255,255,255,0.35);
-  font-weight: 400;
-  letter-spacing: 0.05em;
-}
-
-/* ── DIVIDER LINE ── */
-.divider-line {
-  width: 1px;
-  height: 40px;
-  background: rgba(255,255,255,0.1);
-  align-self: center;
-}
+.stat-lbl { font-size: 12px; color: rgba(255,255,255,0.35); font-weight: 400; letter-spacing: 0.05em; }
+.divider-line { width: 1px; height: 40px; background: rgba(255,255,255,0.1); align-self: center; }
 
 /* ── FEATURES ── */
-.features {
-  padding: 100px 0;
-  position: relative;
-  z-index: 1;
-}
+.features { padding: 100px 0; position: relative; z-index: 1; }
 .features-label {
   text-align: center;
   font-size: 11px;
@@ -409,25 +465,12 @@ nav {
   margin-bottom: 64px;
   letter-spacing: -0.02em;
 }
-.features h2 em {
-  font-style: italic;
-  color: var(--brand-light);
-}
-
+.features h2 em { font-style: italic; color: var(--brand-light); }
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
-@media (max-width: 768px) {
-  .feature-grid { grid-template-columns: 1fr; }
-  .stats-bar { gap: 32px; }
-  .divider-line { display: none; }
-  nav { padding: 0 24px; }
-  .hero, .page { padding-left: 24px; padding-right: 24px; }
-  .waitlist-box { padding: 28px 24px; }
-}
-
 .feature-card {
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(183,228,199,0.08);
@@ -446,12 +489,8 @@ nav {
   opacity: 0;
   transition: opacity 0.3s;
 }
-.feature-card:hover {
-  border-color: rgba(183,228,199,0.2);
-  transform: translateY(-3px);
-}
+.feature-card:hover { border-color: rgba(183,228,199,0.2); transform: translateY(-3px); }
 .feature-card:hover::before { opacity: 1; }
-
 .feature-icon {
   width: 44px; height: 44px;
   border-radius: 12px;
@@ -462,19 +501,8 @@ nav {
 .feature-icon.green { background: rgba(64,145,108,0.15); border: 1px solid rgba(64,145,108,0.2); }
 .feature-icon.gold  { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.2); }
 .feature-icon.coral { background: rgba(231,111,81,0.12); border: 1px solid rgba(231,111,81,0.2); }
-
-.feature-card h4 {
-  font-family: 'Playfair Display', serif;
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #fff;
-}
-.feature-card p {
-  font-size: 13px;
-  color: rgba(255,255,255,0.45);
-  line-height: 1.65;
-}
+.feature-card h4 { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+.feature-card p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.65; }
 .feature-tag {
   display: inline-block;
   margin-top: 14px;
@@ -489,11 +517,7 @@ nav {
 }
 
 /* ── HOW IT WORKS ── */
-.how {
-  padding: 80px 0 100px;
-  position: relative;
-  z-index: 1;
-}
+.how { padding: 80px 0 100px; position: relative; z-index: 1; }
 .how h2 {
   font-family: 'Playfair Display', serif;
   font-size: clamp(26px, 4vw, 40px);
@@ -515,14 +539,7 @@ nav {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(183,228,199,0.2), rgba(201,168,76,0.2), rgba(183,228,199,0.2), transparent);
 }
-@media (max-width: 768px) {
-  .steps { grid-template-columns: 1fr 1fr; gap: 24px; }
-  .steps::before { display: none; }
-}
-.step {
-  text-align: center;
-  padding: 0 16px;
-}
+.step { text-align: center; padding: 0 16px; }
 .step-num {
   width: 44px; height: 44px;
   border-radius: 50%;
@@ -537,24 +554,11 @@ nav {
   position: relative;
   z-index: 1;
 }
-.step h4 {
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 8px;
-}
-.step p {
-  font-size: 12.5px;
-  color: rgba(255,255,255,0.4);
-  line-height: 1.6;
-}
+.step h4 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+.step p { font-size: 12.5px; color: rgba(255,255,255,0.4); line-height: 1.6; }
 
-/* ── SOCIAL PROOF ── */
-.proof {
-  padding: 80px 0;
-  position: relative;
-  z-index: 1;
-}
+/* ── POSITIONING QUOTE ── */
+.proof { padding: 80px 0; position: relative; z-index: 1; }
 .proof-inner {
   background: rgba(183,228,199,0.04);
   border: 1px solid rgba(183,228,199,0.1);
@@ -570,34 +574,20 @@ nav {
   color: rgba(255,255,255,0.85);
   line-height: 1.5;
   max-width: 640px;
-  margin: 0 auto 28px;
+  margin: 0 auto 20px;
 }
 .proof-inner blockquote em { color: var(--brand-light); font-style: normal; font-weight: 700; }
-.proof-author {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-.proof-avatar {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand-mid), var(--gold));
-  display: flex; align-items: center; justify-content: center;
+.proof-inner .proof-body {
+  font-family: 'DM Sans', sans-serif;
   font-size: 14px;
-  font-weight: 700;
-  color: #fff;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 0 auto;
 }
-.proof-author-info strong { font-size: 14px; color: #fff; display: block; font-weight: 600; }
-.proof-author-info span { font-size: 12px; color: rgba(255,255,255,0.4); }
 
 /* ── BOTTOM CTA ── */
-.bottom-cta {
-  padding: 80px 0 120px;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
+.bottom-cta { padding: 80px 0 120px; text-align: center; position: relative; z-index: 1; }
 .bottom-cta h2 {
   font-family: 'Playfair Display', serif;
   font-size: clamp(28px, 4vw, 44px);
@@ -606,17 +596,22 @@ nav {
   letter-spacing: -0.02em;
 }
 .bottom-cta h2 em { font-style: italic; color: var(--gold); }
-.bottom-cta p {
-  font-size: 15px;
-  color: rgba(255,255,255,0.45);
-  margin-bottom: 40px;
-}
-.bottom-cta .submit-btn {
-  width: auto;
+.bottom-cta p { font-size: 15px; color: rgba(255,255,255,0.45); margin-bottom: 40px; }
+.cta-btn {
+  display: inline-block;
+  background: var(--brand-mid);
+  color: #fff;
+  border: none;
   padding: 16px 48px;
+  font-family: 'DM Sans', sans-serif;
   font-size: 16px;
+  font-weight: 600;
   border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.01em;
 }
+.cta-btn:hover { background: #52b788; transform: translateY(-1px); }
 
 /* ── FOOTER ── */
 footer {
@@ -635,414 +630,41 @@ footer {
   font-size: 15px;
   font-weight: 700;
   color: var(--brand-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.footer-note {
-  font-size: 12px;
-  color: rgba(255,255,255,0.25);
-}
+.footer-logo { width: 28px; height: 28px; }
+.footer-note { font-size: 12px; color: rgba(255,255,255,0.25); }
 
 /* ── ANIMATIONS ── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ── COUNTDOWN ── */
-.countdown {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  margin: 0 auto 40px;
-  animation: fadeUp 0.6s 0.35s ease both;
-}
-.cd-item {
-  text-align: center;
-}
-.cd-num {
-  font-family: 'Playfair Display', serif;
-  font-size: 28px;
-  font-weight: 900;
-  color: #fff;
-  line-height: 1;
-  display: block;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(183,228,199,0.1);
-  border-radius: 10px;
-  width: 56px;
-  padding: 10px 0;
-  margin-bottom: 5px;
-}
-.cd-lbl {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.3);
-}
-.cd-sep {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px;
-  color: rgba(255,255,255,0.2);
-  align-self: flex-end;
-  padding-bottom: 16px;
-}
-
-/* ── WAITLIST COUNT ── */
-.waitlist-count {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 20px;
-  font-size: 13px;
-  color: rgba(255,255,255,0.5);
-  animation: fadeUp 0.6s 0.15s ease both;
-}
-.mini-avatars {
-  display: flex;
-}
-.mini-avatar {
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  border: 2px solid #0e1f18;
-  margin-left: -6px;
-  background: linear-gradient(135deg, var(--brand-mid), var(--gold));
-  font-size: 9px;
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700;
-}
-.mini-avatar:first-child { margin-left: 0; }
-.mini-avatar:nth-child(2) { background: linear-gradient(135deg, #E76F51, #C9A84C); }
-.mini-avatar:nth-child(3) { background: linear-gradient(135deg, #40916C, #2D6A4F); }
-</style>
-</head>
-<body>
-
-<!-- BACKGROUND -->
-<div class="bg-canvas">
-  <div class="bg-orb bg-orb-1"></div>
-  <div class="bg-orb bg-orb-2"></div>
-  <div class="bg-orb bg-orb-3"></div>
-</div>
-
-<!-- NAV -->
-<nav>
-  <div class="nav-brand">
-    <svg class="nav-logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100" height="100" rx="22" fill="#1B4332"/>
-      <path d="M 72,20 A 33,33 0 1 0 80,74" fill="none" stroke="#B7E4C7" stroke-width="7.5" stroke-linecap="round"/>
-      <line x1="29" y1="50" x2="71" y2="50" stroke="#B7E4C7" stroke-width="6" stroke-linecap="round"/>
-      <rect x="24" y="40" width="8" height="20" rx="3.5" fill="#B7E4C7"/>
-      <rect x="68" y="40" width="8" height="20" rx="3.5" fill="#B7E4C7"/>
-      <path d="M 76,50 L 84,50 L 84,59" fill="none" stroke="#B7E4C7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    Gourmet Gains
-  </div>
-  <button class="nav-cta" onclick="document.getElementById('waitlist-form').scrollIntoView({behavior:'smooth'})">
-    Join the Waitlist
-  </button>
-</nav>
-
-<!-- HERO -->
-<section class="hero page" id="top">
-  <div class="hero-tag">
-    <span class="hero-tag-dot"></span>
-    Early Access — Limited Spots Available
-  </div>
-
-  <h1>
-    The meal-kit that<br>
-    <em>builds</em> you — not just<br>
-    <span class="accent-word">feeds</span> you.
-  </h1>
-
-  <p class="hero-sub">
-    Goal-specific. Macro-tracked. Regeneratively sourced.<br>
-    A fitness meal-kit that teaches you to cook like an athlete.
-  </p>
-
-  <!-- SOCIAL PROOF COUNT -->
-  <div class="waitlist-count">
-    <div class="mini-avatars">
-      <div class="mini-avatar">JM</div>
-      <div class="mini-avatar">SR</div>
-      <div class="mini-avatar">AK</div>
-    </div>
-    <span><strong id="waitlist-num" style="color:rgba(255,255,255,0.75)">847</strong> people already on the waitlist</span>
-  </div>
-
-  <!-- WAITLIST FORM -->
-  <div class="waitlist-box" id="waitlist-form">
-    <!-- FORM STATE -->
-    <div id="form-state">
-      <h3>Secure your spot</h3>
-      <p>Be first to know when we launch. No spam — ever.</p>
-      <div class="form-row">
-        <input id="user-name" class="form-input" type="text" placeholder="Your first name" required autocomplete="given-name">
-        <input id="user-email" class="form-input" type="email" placeholder="Email address" required autocomplete="email">
-        <select id="user-goal" class="form-input goal-select">
-          <option value="" disabled selected>Your fitness goal…</option>
-          <option value="Muscle Gain">💪 Muscle gain</option>
-          <option value="Fat Loss">🔥 Fat loss</option>
-          <option value="Performance">⚡ Performance & endurance</option>
-          <option value="Maintenance">🎯 Maintenance & wellbeing</option>
-        </select>
-      </div>
-      <button class="submit-btn" id="submit-btn" onclick="handleSignup()">
-        Join the Waitlist — It's Free
-      </button>
-      <p class="privacy-note">🔒 We respect your privacy. Unsubscribe anytime.</p>
-    </div>
-
-    <!-- SUCCESS STATE -->
-    <div class="success-state" id="success-state">
-      <div class="success-icon">🌿</div>
-      <h3>You're on the list!</h3>
-      <p>Check your inbox — a welcome note from us is on its way.<br>We'll be in touch when Gourmet Gains launches.</p>
-      <span class="success-pos" id="success-pos">You're #848 on the waitlist</span>
-    </div>
-  </div>
-
-  <!-- STATS BAR -->
-  <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-val">3<span>goals</span></div>
-      <div class="stat-lbl">Muscle · Fat Loss · Maintenance</div>
-    </div>
-    <div class="divider-line"></div>
-    <div class="stat-item">
-      <div class="stat-val">100<span>%</span></div>
-      <div class="stat-lbl">Whole-food, tracked macros</div>
-    </div>
-    <div class="divider-line"></div>
-    <div class="stat-item">
-      <div class="stat-val">0<span>waste</span></div>
-      <div class="stat-lbl">Pre-portioned, nothing wasted</div>
-    </div>
-    <div class="divider-line"></div>
-    <div class="stat-item">
-      <div class="stat-val">UK<span>farms</span></div>
-      <div class="stat-lbl">Regenerative sourcing</div>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section class="features">
-  <div class="page">
-    <p class="features-label">What makes us different</p>
-    <h2>Finally, a meal-kit that speaks<br><em>your language</em></h2>
-
-    <div class="feature-grid">
-      <div class="feature-card reveal">
-        <div class="feature-icon green">🎯</div>
-        <h4>Goal-Based Meal Plans</h4>
-        <p>Select muscle gain, fat loss, or maintenance and receive ingredients calibrated to hit your macro targets — with recipe cards that explain the nutritional reasoning.</p>
-        <span class="feature-tag">Personalised to you</span>
-      </div>
-      <div class="feature-card reveal">
-        <div class="feature-icon gold">📖</div>
-        <h4>Learn While You Cook</h4>
-        <p>Every box teaches you something real — cooking technique, ingredient function, and the science behind performance eating. You become more capable, not more dependent.</p>
-        <span class="feature-tag">Skill-building</span>
-      </div>
-      <div class="feature-card reveal">
-        <div class="feature-icon coral">🌱</div>
-        <h4>Regeneratively Sourced</h4>
-        <p>Ingredients from named UK farms using agroecological practices. We tell you exactly where your food comes from — because quality starts in the soil, not the supplement aisle.</p>
-        <span class="feature-tag">Farm to doorstep</span>
-      </div>
-      <div class="feature-card reveal">
-        <div class="feature-icon green">⚖️</div>
-        <h4>Macro Accuracy You Can Trust</h4>
-        <p>Our recipes are validated by a registered sports nutritionist. Every macro listed is real — because a fitness audience deserves precision, not estimates.</p>
-        <span class="feature-tag">Nutritionist verified</span>
-      </div>
-      <div class="feature-card reveal">
-        <div class="feature-icon gold">📦</div>
-        <h4>Zero Waste Portioning</h4>
-        <p>Pre-portioned ingredients eliminate over-buying and food waste. What you receive is exactly what the recipe needs — nothing surplus, nothing missing.</p>
-        <span class="feature-tag">Sustainable by design</span>
-      </div>
-      <div class="feature-card reveal">
-        <div class="feature-icon coral">🤝</div>
-        <h4>Community & Challenges</h4>
-        <p>Join transformation challenges, log results, share meals, and connect with a community who trains as hard as they eat. Progress tastes better together.</p>
-        <span class="feature-tag">Built-in community</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section class="how">
-  <div class="page">
-    <h2>Four steps to eating like a pro</h2>
-    <div class="steps reveal">
-      <div class="step">
-        <div class="step-num">1</div>
-        <h4>Set your goal</h4>
-        <p>Muscle gain, fat loss, performance, or maintenance — we design around your objective.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <h4>Receive your box</h4>
-        <p>Pre-portioned, farm-fresh ingredients arrive at your door, weekly or fortnightly.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <h4>Cook & learn</h4>
-        <p>Follow guided recipes that teach technique and the science behind every ingredient.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <h4>Track & progress</h4>
-        <p>Hit your macros, see real results, and build genuine nutritional independence over time.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- POSITIONING QUOTE -->
-<section class="proof">
-  <div class="page">
-    <div class="proof-inner reveal">
-      <blockquote>
-        "The fitness meal-kit that <em>builds you</em> — not just feeds you."
-      </blockquote>
-      <p style="font-family:'DM Sans',sans-serif;font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;max-width:560px;margin:0 auto;">Goal-specific. Macro-tracked. Regeneratively sourced. A brand for people who understand that nutrition is not dinner — it's performance infrastructure. The regenerative sourcing and sustainability commitments are the foundation beneath the brand, and genuine nutritional independence is the promise we keep.</p>
-    </div>
-  </div>
-</section>
-
-<!-- BOTTOM CTA -->
-<section class="bottom-cta">
-  <div class="page">
-    <h2>Ready to eat<br><em>with intention?</em></h2>
-    <p>Join the waitlist. Be first in line when we launch.</p>
-    <button class="submit-btn" style="width:auto;padding:16px 48px;font-size:16px;border-radius:100px;" onclick="document.getElementById('waitlist-form').scrollIntoView({behavior:'smooth'})">
-      Secure My Spot →
-    </button>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-brand">
-    <svg style="width:28px;height:28px;vertical-align:middle;margin-right:8px;" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100" height="100" rx="22" fill="#1B4332"/>
-      <path d="M 72,20 A 33,33 0 1 0 80,74" fill="none" stroke="#B7E4C7" stroke-width="7.5" stroke-linecap="round"/>
-      <line x1="29" y1="50" x2="71" y2="50" stroke="#B7E4C7" stroke-width="6" stroke-linecap="round"/>
-      <rect x="24" y="40" width="8" height="20" rx="3.5" fill="#B7E4C7"/>
-      <rect x="68" y="40" width="8" height="20" rx="3.5" fill="#B7E4C7"/>
-      <path d="M 76,50 L 84,50 L 84,59" fill="none" stroke="#B7E4C7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>Gourmet Gains</div>
-  <div class="footer-note">© 2025 Gourmet Gains. All rights reserved. · info@gourmetgains.co.uk</div>
-</footer>
-
-<script>
-  (function() {
-    // ── EmailJS Init ──
-    // SETUP REQUIRED: Replace these with your own EmailJS credentials.
-    // 1. Sign up free at https://www.emailjs.com
-    // 2. Create a service (Gmail works) and note your Service ID
-    // 3. Create an email template using the template below — note your Template ID
-    // 4. Find your Public Key in Account > API Keys
-    const EMAILJS_PUBLIC_KEY  = "Y4g53tUGsk-2Pd9kN";
-    const EMAILJS_SERVICE_ID  = "service_f5wbpeb";
-    const EMAILJS_TEMPLATE_ID = "template_kwpm308";
-    // ALSO: Add your notification email in the template so YOU get alerted per signup.
-
-    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-
-    // ── Scroll Reveals ──
-    const revealEls = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach((e, i) => {
-        if (e.isIntersecting) {
-          setTimeout(() => e.target.classList.add('visible'), i * 80);
-          observer.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.12 });
-    revealEls.forEach(el => observer.observe(el));
-
-    // ── Waitlist counter (local, bumps on each signup) ──
-    let count = parseInt(localStorage.getItem('gg_waitlist_count') || '847');
-    document.getElementById('waitlist-num').textContent = count.toLocaleString();
-
-    // ── Signup handler ──
-    window.handleSignup = function() {
-      const name   = document.getElementById('user-name').value.trim();
-      const email  = document.getElementById('user-email').value.trim();
-      const goal   = document.getElementById('user-goal').value;
-      const btn    = document.getElementById('submit-btn');
-
-      if (!name || !email) {
-        shake(btn);
-        return;
-      }
-      if (!email.includes('@') || !email.includes('.')) {
-        shake(btn);
-        return;
-      }
-
-      btn.textContent = 'Joining…';
-      btn.classList.add('loading');
-
-      const templateParams = {
-        to_name:   name,
-        to_email:  email,
-        user_goal: goal || 'Not specified',
-        reply_to:  'info@gourmetgains.co.uk',
-      };
-
-      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-        .then(() => {
-          showSuccess(name, email);
-        })
-        .catch(() => {
-          // Fallback: still show success to user even if email fails
-          // (you can log this server-side in production)
-          showSuccess(name, email);
-        });
-    };
-
-    function showSuccess(name) {
-      count++;
-      localStorage.setItem('gg_waitlist_count', count);
-      document.getElementById('waitlist-num').textContent = count.toLocaleString();
-      document.getElementById('success-pos').textContent = `You're #${count.toLocaleString()} on the waitlist`;
-      document.getElementById('form-state').style.display = 'none';
-      const s = document.getElementById('success-state');
-      s.style.display = 'flex';
-    }
-
-    function shake(el) {
-      el.style.animation = 'none';
-      el.offsetHeight; // reflow
-      el.style.animation = 'shake 0.4s ease';
-      el.textContent = 'Please fill in your name & email';
-      setTimeout(() => { el.textContent = 'Join the Waitlist — It\'s Free'; }, 2000);
-    }
-  })();
-</script>
-<style>
 @keyframes shake {
   0%,100% { transform: translateX(0); }
   20%,60%  { transform: translateX(-6px); }
   40%,80%  { transform: translateX(6px); }
 }
-</style>
-</body>
-</html>
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  nav { padding: 0 24px; }
+  .page { padding: 0 24px; }
+  .hero { padding: 100px 24px 60px; }
+  .waitlist-box { padding: 28px 24px; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .steps::before { display: none; }
+  .stats-bar { gap: 32px; }
+  .divider-line { display: none; }
+  footer { padding: 24px; flex-direction: column; text-align: center; }
+  .proof-inner { padding: 36px 24px; }
+}
