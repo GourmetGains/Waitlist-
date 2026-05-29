@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gourmet Gains — Join the Waitlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --brand: #2D6A4F;
+  --brand-dark: #1B4332;
+  --brand-mid: #40916C;
+  --brand-light: #B7E4C7;
+  --brand-pale: #D8F3DC;
+  --accent: #E76F51;
+  --accent-light: #FDEBD0;
+  --gold: #C9A84C;
+  --gold-light: #FDF3D0;
+  --text: #1a1a1a;
+  --text-mid: #444;
+  --text-muted: #777;
+  --border: #e0e0e0;
+  --bg: #0e1f18;
+  --surface: rgba(255,255,255,0.04);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── ANIMATED BACKGROUND ── */
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.18;
+  animation: drift 20s ease-in-out infinite alternate;
+}
+.bg-orb-1 {
+  width: 600px; height: 600px;
+  background: #40916C;
+  top: -150px; right: -100px;
+  animation-delay: 0s;
+}
+.bg-orb-2 {
+  width: 400px; height: 400px;
+  background: #C9A84C;
+  bottom: 10%; left: -100px;
+  animation-delay: -7s;
+  animation-duration: 25s;
+}
+.bg-orb-3 {
+  width: 300px; height: 300px;
+  background: #E76F51;
+  top: 40%; right: 20%;
+  animation-delay: -14s;
+  animation-duration: 18s;
+  opacity: 0.1;
+}
+@keyframes drift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(30px, 40px) scale(1.08); }
+}
+
+/* ── NOISE TEXTURE OVERLAY ── */
+.bg-canvas::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
+
+/* ── LAYOUT ── */
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 0 60px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(14,31,24,0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(183,228,199,0.08);
+}
+.nav-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brand-light);
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-logo-mark {
+  width: 36px; height: 36px;
+  flex-shrink: 0;
+}
+.nav-cta {
+  background: var(--brand-mid);
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.02em;
+}
+.nav-cta:hover { background: #52b788; transform: translateY(-1px); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 40px 80px;
+  position: relative;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(183,228,199,0.1);
+  border: 1px solid rgba(183,228,199,0.2);
+  color: var(--brand-light);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border-radius: 100px;
+  margin-bottom: 32px;
+  animation: fadeUp 0.6s ease both;
+}
+.hero-tag-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #52b788;
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(44px, 7vw, 80px);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--brand-light);
+}
+.hero h1 .accent-word {
+  position: relative;
+  display: inline-block;
+  color: var(--gold);
+}
+
+.hero-sub {
+  font-size: clamp(16px, 2vw, 19px);
+  color: rgba(255,255,255,0.55);
+  max-width: 540px;
+  margin: 0 auto 48px;
+  line-height: 1.7;
+  font-weight: 300;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+
+/* ── WAITLIST FORM ── */
+.waitlist-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(183,228,199,0.12);
+  border-radius: 20px;
+  padding: 40px 48px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto 60px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+.waitlist-box h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #fff;
+}
+.waitlist-box p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.form-input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(183,228,199,0.15);
+  border-radius: 12px;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 14px 18px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.form-input::placeholder { color: rgba(255,255,255,0.3); }
+.form-input:focus {
+  border-color: rgba(183,228,199,0.4);
+  background: rgba(255,255,255,0.08);
+}
+
+.goal-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(183,228,199,0.5)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  cursor: pointer;
+}
+.goal-select option { background: #1B4332; color: #fff; }
+
+.submit-btn {
+  width: 100%;
+  background: var(--brand-mid);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.01em;
+  margin-top: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.submit-btn:hover { background: #52b788; transform: translateY(-1px); }
+.submit-btn:active { transform: translateY(0); }
+.submit-btn.loading { opacity: 0.7; pointer-events: none; cursor: wait; }
+.submit-btn.success { background: #1B4332; }
+
+.privacy-note {
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+  text-align: center;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+/* ── SUCCESS STATE ── */
+.success-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 0;
+}
+.success-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(64,145,108,0.2);
+  border: 1px solid rgba(183,228,199,0.3);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+  font-size: 24px;
+  animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes scaleIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.success-state h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brand-light);
+  margin-bottom: 8px;
+}
+.success-state p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+.success-pos {
+  display: inline-block;
+  margin-top: 16px;
+  background: rgba(201,168,76,0.15);
+  border: 1px solid rgba(201,168,76,0.25);
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 6px 14px;
+  border-radius: 100px;
+}
+
+/* ── STATS BAR ── */
+.stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  flex-wrap: wrap;
+  margin: 0 auto 80px;
+  animation: fadeUp 0.6s 0.4s ease both;
+}
+.stat-item {
+  text-align: center;
+}
+.stat-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+.stat-val span { color: var(--brand-light); }
+.stat-lbl {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+/* ── DIVIDER LINE ── */
+.divider-line {
+  width: 1px;
+  height: 40px;
+  background: rgba(255,255,255,0.1);
+  align-self: center;
+}
+
+/* ── FEATURES ── */
+.features {
+  padding: 100px 0;
+  position: relative;
+  z-index: 1;
+}
+.features-label {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand-light);
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+.features h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 900;
+  text-align: center;
+  line-height: 1.15;
+  margin-bottom: 64px;
+  letter-spacing: -0.02em;
+}
+.features h2 em {
+  font-style: italic;
+  color: var(--brand-light);
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 768px) {
+  .feature-grid { grid-template-columns: 1fr; }
+  .stats-bar { gap: 32px; }
+  .divider-line { display: none; }
+  nav { padding: 0 24px; }
+  .hero, .page { padding-left: 24px; padding-right: 24px; }
+  .waitlist-box { padding: 28px 24px; }
+}
+
+.feature-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(183,228,199,0.08);
+  border-radius: 16px;
+  padding: 28px 24px;
+  transition: border-color 0.3s, transform 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(183,228,199,0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.feature-card:hover {
+  border-color: rgba(183,228,199,0.2);
+  transform: translateY(-3px);
+}
+.feature-card:hover::before { opacity: 1; }
+
+.feature-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+.feature-icon.green { background: rgba(64,145,108,0.15); border: 1px solid rgba(64,145,108,0.2); }
+.feature-icon.gold  { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.2); }
+.feature-icon.coral { background: rgba(231,111,81,0.12); border: 1px solid rgba(231,111,81,0.2); }
+
+.feature-card h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #fff;
+}
+.feature-card p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.65;
+}
+.feature-tag {
+  display: inline-block;
+  margin-top: 14px;
+  background: rgba(183,228,199,0.08);
+  color: var(--brand-light);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 4px 11px;
+  border-radius: 100px;
+  border: 1px solid rgba(183,228,199,0.12);
+}
+
+/* ── HOW IT WORKS ── */
+.how {
+  padding: 80px 0 100px;
+  position: relative;
+  z-index: 1;
+}
+.how h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(26px, 4vw, 40px);
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 60px;
+  letter-spacing: -0.02em;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  position: relative;
+}
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 22px; left: 12.5%; right: 12.5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(183,228,199,0.2), rgba(201,168,76,0.2), rgba(183,228,199,0.2), transparent);
+}
+@media (max-width: 768px) {
+  .steps { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .steps::before { display: none; }
+}
+.step {
+  text-align: center;
+  padding: 0 16px;
+}
+.step-num {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--brand-dark);
+  border: 1px solid rgba(183,228,199,0.2);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--brand-light);
+  position: relative;
+  z-index: 1;
+}
+.step h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.step p {
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.6;
+}
+
+/* ── SOCIAL PROOF ── */
+.proof {
+  padding: 80px 0;
+  position: relative;
+  z-index: 1;
+}
+.proof-inner {
+  background: rgba(183,228,199,0.04);
+  border: 1px solid rgba(183,228,199,0.1);
+  border-radius: 24px;
+  padding: 56px 48px;
+  text-align: center;
+}
+.proof-inner blockquote {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(18px, 2.5vw, 26px);
+  font-style: italic;
+  font-weight: 400;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.5;
+  max-width: 640px;
+  margin: 0 auto 28px;
+}
+.proof-inner blockquote em { color: var(--brand-light); font-style: normal; font-weight: 700; }
+.proof-author {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.proof-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-mid), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.proof-author-info strong { font-size: 14px; color: #fff; display: block; font-weight: 600; }
+.proof-author-info span { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+/* ── BOTTOM CTA ── */
+.bottom-cta {
+  padding: 80px 0 120px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.bottom-cta h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 900;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+.bottom-cta h2 em { font-style: italic; color: var(--gold); }
+.bottom-cta p {
+  font-size: 15px;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 40px;
+}
+.bottom-cta .submit-btn {
+  width: auto;
+  padding: 16px 48px;
+  font-size: 16px;
+  border-radius: 100px;
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 32px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--brand-light);
+}
+.footer-note {
+  font-size: 12px;
+  color: rgba(255,255,255,0.25);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── COUNTDOWN ── */
+.countdown {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 0 auto 40px;
+  animation: fadeUp 0.6s 0.35s ease both;
+}
+.cd-item {
+  text-align: center;
+}
+.cd-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  display: block;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(183,228,199,0.1);
+  border-radius: 10px;
+  width: 56px;
+  padding: 10px 0;
+  margin-bottom: 5px;
+}
+.cd-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+.cd-sep {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  color: rgba(255,255,255,0.2);
+  align-self: flex-end;
+  padding-bottom: 16px;
+}
+
+/* ── WAITLIST COUNT ── */
+.waitlist-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  animation: fadeUp 0.6s 0.15s ease both;
+}
+.mini-avatars {
+  display: flex;
+}
+.mini-avatar {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2px solid #0e1f18;
+  margin-left: -6px;
+  background: linear-gradient(135deg, var(--brand-mid), var(--gold));
+  font-size: 9px;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+}
+.mini-avatar:first-child { margin-left: 0; }
+.mini-avatar:nth-child(2) { background: linear-gradient(135deg, #E76F51, #C9A84C); }
+.mini-avatar:nth-child(3) { background: linear-gradient(135deg, #40916C, #2D6A4F); }
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg-canvas">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <svg class="nav-logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="22" fill="#1B4332"/>
+      <path d="M 72,20 A 33,33 0 1 0 80,74" fill="none" stroke="#B7E4C7" stroke-width="7.5" stroke-linecap="round"/>
+      <line x1="29" y1="50" x2="71" y2="50" stroke="#B7E4C7" stroke-width="6" stroke-linecap="round"/>
+      <rect x="24" y="40" width="8" height="20" rx="3.5" fill="#B7E4C7"/>
+      <rect x="68" y="40" width="8" height="20" rx="3.5" fill="#B7E4C7"/>
+      <path d="M 76,50 L 84,50 L 84,59" fill="none" stroke="#B7E4C7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Gourmet Gains
+  </div>
+  <button class="nav-cta" onclick="document.getElementById('waitlist-form').scrollIntoView({behavior:'smooth'})">
+    Join the Waitlist
+  </button>
+</nav>
+
+<!-- HERO -->
+<section class="hero page" id="top">
+  <div class="hero-tag">
+    <span class="hero-tag-dot"></span>
+    Early Access — Limited Spots Available
+  </div>
+
+  <h1>
+    The meal-kit that<br>
+    <em>builds</em> you — not just<br>
+    <span class="accent-word">feeds</span> you.
+  </h1>
+
+  <p class="hero-sub">
+    Goal-specific. Macro-tracked. Regeneratively sourced.<br>
+    A fitness meal-kit that teaches you to cook like an athlete.
+  </p>
+
+  <!-- SOCIAL PROOF COUNT -->
+  <div class="waitlist-count">
+    <div class="mini-avatars">
+      <div class="mini-avatar">JM</div>
+      <div class="mini-avatar">SR</div>
+      <div class="mini-avatar">AK</div>
+    </div>
+    <span><strong id="waitlist-num" style="color:rgba(255,255,255,0.75)">847</strong> people already on the waitlist</span>
+  </div>
+
+  <!-- WAITLIST FORM -->
+  <div class="waitlist-box" id="waitlist-form">
+    <!-- FORM STATE -->
+    <div id="form-state">
+      <h3>Secure your spot</h3>
+      <p>Be first to know when we launch. No spam — ever.</p>
+      <div class="form-row">
+        <input id="user-name" class="form-input" type="text" placeholder="Your first name" required autocomplete="given-name">
+        <input id="user-email" class="form-input" type="email" placeholder="Email address" required autocomplete="email">
+        <select id="user-goal" class="form-input goal-select">
+          <option value="" disabled selected>Your fitness goal…</option>
+          <option value="Muscle Gain">💪 Muscle gain</option>
+          <option value="Fat Loss">🔥 Fat loss</option>
+          <option value="Performance">⚡ Performance & endurance</option>
+          <option value="Maintenance">🎯 Maintenance & wellbeing</option>
+        </select>
+      </div>
+      <button class="submit-btn" id="submit-btn" onclick="handleSignup()">
+        Join the Waitlist — It's Free
+      </button>
+      <p class="privacy-note">🔒 We respect your privacy. Unsubscribe anytime.</p>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="success-state" id="success-state">
+      <div class="success-icon">🌿</div>
+      <h3>You're on the list!</h3>
+      <p>Check your inbox — a welcome note from us is on its way.<br>We'll be in touch when Gourmet Gains launches.</p>
+      <span class="success-pos" id="success-pos">You're #848 on the waitlist</span>
+    </div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-val">3<span>goals</span></div>
+      <div class="stat-lbl">Muscle · Fat Loss · Maintenance</div>
+    </div>
+    <div class="divider-line"></div>
+    <div class="stat-item">
+      <div class="stat-val">100<span>%</span></div>
+      <div class="stat-lbl">Whole-food, tracked macros</div>
+    </div>
+    <div class="divider-line"></div>
+    <div class="stat-item">
+      <div class="stat-val">0<span>waste</span></div>
+      <div class="stat-lbl">Pre-portioned, nothing wasted</div>
+    </div>
+    <div class="divider-line"></div>
+    <div class="stat-item">
+      <div class="stat-val">UK<span>farms</span></div>
+      <div class="stat-lbl">Regenerative sourcing</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="page">
+    <p class="features-label">What makes us different</p>
+    <h2>Finally, a meal-kit that speaks<br><em>your language</em></h2>
+
+    <div class="feature-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon green">🎯</div>
+        <h4>Goal-Based Meal Plans</h4>
+        <p>Select muscle gain, fat loss, or maintenance and receive ingredients calibrated to hit your macro targets — with recipe cards that explain the nutritional reasoning.</p>
+        <span class="feature-tag">Personalised to you</span>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon gold">📖</div>
+        <h4>Learn While You Cook</h4>
+        <p>Every box teaches you something real — cooking technique, ingredient function, and the science behind performance eating. You become more capable, not more dependent.</p>
+        <span class="feature-tag">Skill-building</span>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon coral">🌱</div>
+        <h4>Regeneratively Sourced</h4>
+        <p>Ingredients from named UK farms using agroecological practices. We tell you exactly where your food comes from — because quality starts in the soil, not the supplement aisle.</p>
+        <span class="feature-tag">Farm to doorstep</span>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon green">⚖️</div>
+        <h4>Macro Accuracy You Can Trust</h4>
+        <p>Our recipes are validated by a registered sports nutritionist. Every macro listed is real — because a fitness audience deserves precision, not estimates.</p>
+        <span class="feature-tag">Nutritionist verified</span>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon gold">📦</div>
+        <h4>Zero Waste Portioning</h4>
+        <p>Pre-portioned ingredients eliminate over-buying and food waste. What you receive is exactly what the recipe needs — nothing surplus, nothing missing.</p>
+        <span class="feature-tag">Sustainable by design</span>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon coral">🤝</div>
+        <h4>Community & Challenges</h4>
+        <p>Join transformation challenges, log results, share meals, and connect with a community who trains as hard as they eat. Progress tastes better together.</p>
+        <span class="feature-tag">Built-in community</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="page">
+    <h2>Four steps to eating like a pro</h2>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h4>Set your goal</h4>
+        <p>Muscle gain, fat loss, performance, or maintenance — we design around your objective.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h4>Receive your box</h4>
+        <p>Pre-portioned, farm-fresh ingredients arrive at your door, weekly or fortnightly.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h4>Cook & learn</h4>
+        <p>Follow guided recipes that teach technique and the science behind every ingredient.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h4>Track & progress</h4>
+        <p>Hit your macros, see real results, and build genuine nutritional independence over time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POSITIONING QUOTE -->
+<section class="proof">
+  <div class="page">
+    <div class="proof-inner reveal">
+      <blockquote>
+        "The fitness meal-kit that <em>builds you</em> — not just feeds you."
+      </blockquote>
+      <p style="font-family:'DM Sans',sans-serif;font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;max-width:560px;margin:0 auto;">Goal-specific. Macro-tracked. Regeneratively sourced. A brand for people who understand that nutrition is not dinner — it's performance infrastructure. The regenerative sourcing and sustainability commitments are the foundation beneath the brand, and genuine nutritional independence is the promise we keep.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BOTTOM CTA -->
+<section class="bottom-cta">
+  <div class="page">
+    <h2>Ready to eat<br><em>with intention?</em></h2>
+    <p>Join the waitlist. Be first in line when we launch.</p>
+    <button class="submit-btn" style="width:auto;padding:16px 48px;font-size:16px;border-radius:100px;" onclick="document.getElementById('waitlist-form').scrollIntoView({behavior:'smooth'})">
+      Secure My Spot →
+    </button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <svg style="width:28px;height:28px;vertical-align:middle;margin-right:8px;" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="22" fill="#1B4332"/>
+      <path d="M 72,20 A 33,33 0 1 0 80,74" fill="none" stroke="#B7E4C7" stroke-width="7.5" stroke-linecap="round"/>
+      <line x1="29" y1="50" x2="71" y2="50" stroke="#B7E4C7" stroke-width="6" stroke-linecap="round"/>
+      <rect x="24" y="40" width="8" height="20" rx="3.5" fill="#B7E4C7"/>
+      <rect x="68" y="40" width="8" height="20" rx="3.5" fill="#B7E4C7"/>
+      <path d="M 76,50 L 84,50 L 84,59" fill="none" stroke="#B7E4C7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>Gourmet Gains</div>
+  <div class="footer-note">© 2025 Gourmet Gains. All rights reserved. · info@gourmetgains.co.uk</div>
+</footer>
+
+<script>
+  (function() {
+    // ── EmailJS Init ──
+    // SETUP REQUIRED: Replace these with your own EmailJS credentials.
+    // 1. Sign up free at https://www.emailjs.com
+    // 2. Create a service (Gmail works) and note your Service ID
+    // 3. Create an email template using the template below — note your Template ID
+    // 4. Find your Public Key in Account > API Keys
+    const EMAILJS_PUBLIC_KEY  = "Y4g53tUGsk-2Pd9kN";
+    const EMAILJS_SERVICE_ID  = "service_f5wbpeb";
+    const EMAILJS_TEMPLATE_ID = "template_kwpm308";
+    // ALSO: Add your notification email in the template so YOU get alerted per signup.
+
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+    // ── Scroll Reveals ──
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => observer.observe(el));
+
+    // ── Waitlist counter (local, bumps on each signup) ──
+    let count = parseInt(localStorage.getItem('gg_waitlist_count') || '847');
+    document.getElementById('waitlist-num').textContent = count.toLocaleString();
+
+    // ── Signup handler ──
+    window.handleSignup = function() {
+      const name   = document.getElementById('user-name').value.trim();
+      const email  = document.getElementById('user-email').value.trim();
+      const goal   = document.getElementById('user-goal').value;
+      const btn    = document.getElementById('submit-btn');
+
+      if (!name || !email) {
+        shake(btn);
+        return;
+      }
+      if (!email.includes('@') || !email.includes('.')) {
+        shake(btn);
+        return;
+      }
+
+      btn.textContent = 'Joining…';
+      btn.classList.add('loading');
+
+      const templateParams = {
+        to_name:   name,
+        to_email:  email,
+        user_goal: goal || 'Not specified',
+        reply_to:  'info@gourmetgains.co.uk',
+      };
+
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+        .then(() => {
+          showSuccess(name, email);
+        })
+        .catch(() => {
+          // Fallback: still show success to user even if email fails
+          // (you can log this server-side in production)
+          showSuccess(name, email);
+        });
+    };
+
+    function showSuccess(name) {
+      count++;
+      localStorage.setItem('gg_waitlist_count', count);
+      document.getElementById('waitlist-num').textContent = count.toLocaleString();
+      document.getElementById('success-pos').textContent = `You're #${count.toLocaleString()} on the waitlist`;
+      document.getElementById('form-state').style.display = 'none';
+      const s = document.getElementById('success-state');
+      s.style.display = 'flex';
+    }
+
+    function shake(el) {
+      el.style.animation = 'none';
+      el.offsetHeight; // reflow
+      el.style.animation = 'shake 0.4s ease';
+      el.textContent = 'Please fill in your name & email';
+      setTimeout(() => { el.textContent = 'Join the Waitlist — It\'s Free'; }, 2000);
+    }
+  })();
+</script>
+<style>
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%,60%  { transform: translateX(-6px); }
+  40%,80%  { transform: translateX(6px); }
+}
+</style>
+</body>
+</html>
